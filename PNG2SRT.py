@@ -6,6 +6,7 @@ import base64
 import json
 import os
 import sys
+import time 
 import argparse
 from io import BytesIO
 from PIL import Image, ImageOps
@@ -114,11 +115,14 @@ def ocr_text(filenames):
 		resp = requests.post(VISION_ENDPOINT, data=data, params={"key": AUTH_KEY}, headers={'Content-Type': 'application/json'})
 		#open("output.json","wb").write(resp.text.encode('utf-8'))
 		
-		for idx, r in enumerate(resp.json()['responses']):
-			#open("output_%d.json" % idx,"wb").write(json.dumps(r, indent=4, ensure_ascii=False, encoding="utf-8").encode('utf-8'))
-			
-			if 'textAnnotations' in r:
-				output[requested_filenames[idx]] = r['textAnnotations'][0]['description']#.encode('utf8') # First entry is always the "final" output
+		try:
+			for idx, r in enumerate(resp.json()['responses']):
+				#open("output_%d.json" % idx,"wb").write(json.dumps(r, indent=4, ensure_ascii=False).encode('utf-8'))
+				if 'textAnnotations' in r:
+					output[requested_filenames[idx]] = r['textAnnotations'][0]['description']#.encode('utf8') # First entry is always the "final" output
+				time.sleep(0.2)
+		except KeyError:
+			print(resp.text.encode('utf-8'))
 		
 	return output
 	
